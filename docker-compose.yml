@@ -70,7 +70,17 @@ services:
       - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI=http://keycloak:8080/realms/tpi-backend/protocol/openid-connect/certs
     networks:
       - transporte-net
-    
+  
+  geoapi:
+    build: ./geoapi
+    container_name: geoapi-service
+    ports:
+      - "8083:8080" # Puerto Host:Puerto Contenedor
+    networks:
+      - transporte-net
+    # Opcional: Si necesitas pasar la API Key por variable de entorno para no hardcodearla
+    # environment:
+    #   - GOOGLE_MAPS_APIKEY=TuApiKeyAqui
 
 volumes:
   keycloak_data:

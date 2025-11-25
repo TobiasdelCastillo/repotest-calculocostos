@@ -29,4 +29,6 @@ public interface SolicitudService {
     SolicitudDto createSolicitudConClienteYContenedor(SolicitudDto dto);
 
     SeguimientoSolicitudDto obtenerSeguimiento(Long numero);
+
+    SolicitudDto calcularYGuardarCostos(Long idSolicitud);
 }

@@ -93,5 +93,10 @@ public class SolicitudController {
         return ResponseEntity.ok(response);
     }
     
+    @PostMapping("/{idSolicitud}/calculo-estimado")
+    public ResponseEntity<SolicitudDto> realizarCalculoEstimado(@PathVariable Long idSolicitud) {
+        SolicitudDto response = service.calcularYGuardarCostos(idSolicitud);
+        return ResponseEntity.ok(response);
+    }
 
 }

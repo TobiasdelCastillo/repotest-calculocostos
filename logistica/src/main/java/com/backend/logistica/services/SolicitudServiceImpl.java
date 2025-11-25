@@ -45,6 +45,8 @@ public class SolicitudServiceImpl implements SolicitudService {
     private final ContenedorRepositoryImpl contenedorRepository;
     
     private final CambioEstadoRepositoryImpl cambioEstadoRepository;
+
+    private final CalculoCostosService calculoCostosService;
     
     @Autowired
     private ClientesClient clientesClient;
@@ -271,5 +273,31 @@ public class SolicitudServiceImpl implements SolicitudService {
             .tiempoEstimado(solicitud.getTiempoEstimado())
             .historialEstados(historialDto)
             .build();
+    }
+
+    @Override
+    @Transactional
+    public SolicitudDto calcularYGuardarCostos(Long idSolicitud) {
+        // 1. Verificar que la solicitud existe
+        Solicitud solicitud = solicitudRepository.findById(idSolicitud)
+            .orElseThrow(() -> new NoSuchElementException("Solicitud no encontrada con id: " + idSolicitud));
+
+        // 2. Validar precondiciones (ej: debe tener ruta asignada)
+        if (solicitud.getRutaAsignada() == null) {
+            throw new IllegalStateException("No se pueden calcular costos: La solicitud no tiene una ruta asignada.");
+        }
+
+        // 3. Delegar el cálculo al servicio especializado
+        // Este servicio ya se encarga de llamar a GeoAPI, Gestión y guardar los cambios en la BD.
+        calculoCostosService.calcularEstimado(idSolicitud);
+
+        // 4. Recargar la entidad actualizada desde la BD para devolver el DTO con los nuevos valores
+        Solicitud solicitudActualizada = solicitudRepository.findById(idSolicitud).get();
+        
+        // Necesitamos los DTOs auxiliares para el mapper
+        ClienteDTO clienteDTO = clientesClient.obtenerPorId(solicitudActualizada.getCliente());
+        Contenedor contenedor = solicitudActualizada.getContenedor();
+
+        return SolicitudMapper.entityToDto(solicitudActualizada, clienteDTO, contenedor);
     }
 }
